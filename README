@@ -1,0 +1,149 @@
+NAME
+  threadify.rb
+
+SYNOPSIS
+  enumerable = %w( a b c d )
+  enumerable.threadify(2){ 'process this block using two worker threads' }
+
+DESCRIPTION
+  threadify.rb makes it stupid easy to process a bunch of data using 'n'
+  worker threads
+
+INSTALL
+  gem install threadify
+
+URI
+  http://rubyforge.org/projects/codeforpeople
+
+SAMPLES
+  
+  <========< sample/a.rb >========>
+
+  ~ > cat sample/a.rb
+
+    require 'open-uri'
+    require 'yaml'
+    
+    require 'rubygems'
+    require 'threadify'
+    
+    
+    uris =
+      %w(
+        http://google.com
+        http://yahoo.com
+        http://rubyforge.org
+        http://ruby-lang.org
+        http://kcrw.org
+        http://drawohara.com
+        http://codeforpeople.com
+      )
+    
+    
+    time 'without threadify' do
+      uris.each do |uri|
+        body = open(uri){|pipe| pipe.read}
+      end
+    end
+    
+    
+    time 'with threadify' do
+      uris.threadify do |uri|
+        body = open(uri){|pipe| pipe.read}
+      end
+    end
+    
+    
+    BEGIN {
+      def time label
+        a = Time.now.to_f
+        yield
+      ensure
+        b = Time.now.to_f
+        y label => (b - a)
+      end
+    }
+
+  ~ > ruby sample/a.rb
+
+    /opt/local/lib/ruby/1.8/net/http.rb:560:in `initialize': getaddrinfo: nodename nor servname provided, or not known (SocketError)
+    	from /opt/local/lib/ruby/1.8/net/http.rb:560:in `open'
+    	from /opt/local/lib/ruby/1.8/net/http.rb:560:in `connect'
+    	from /opt/local/lib/ruby/1.8/timeout.rb:48:in `timeout'
+    	from /opt/local/lib/ruby/1.8/timeout.rb:76:in `timeout'
+    	from /opt/local/lib/ruby/1.8/net/http.rb:560:in `connect'
+    	from /opt/local/lib/ruby/1.8/net/http.rb:553:in `do_start'
+    	from /opt/local/lib/ruby/1.8/net/http.rb:542:in `start'
+    	from /opt/local/lib/ruby/1.8/open-uri.rb:242:in `open_http'
+    	 ... 8 levels...
+    	from sample/a.rb:21:in `each'
+    	from sample/a.rb:21
+    	from sample/a.rb:37:in `time'
+    	from sample/a.rb:20
+    --- 
+    without threadify: 0.0373568534851074
+
+
+  <========< sample/b.rb >========>
+
+  ~ > cat sample/b.rb
+
+    require 'yaml'
+    
+    require 'rubygems'
+    require 'threadify'
+    
+    size = Integer(ARGV.shift || (2 ** 15))
+    
+    haystack = Array.new(size){|i| i}
+    needle = 2 * (size / 3) 
+    
+    a, b = 4, 2
+    
+    time 'without threadify' do
+      a = haystack.each{|value| break value if value == needle}
+    end
+    
+    time 'with threadify' do
+      b = haystack.threadify(16){|value| threadify! value if value == needle}
+    end
+    
+    raise if a != b
+    
+    y :a => a, :b => b, :needle => needle
+    
+    BEGIN {
+      def time label
+        a = Time.now.to_f
+        yield
+      ensure
+        b = Time.now.to_f
+        y label => (b - a)
+      end
+    }
+
+  ~ > ruby sample/b.rb
+
+    --- 
+    without threadify: 0.00681805610656738
+    --- 
+    with threadify: 0.57867693901062
+    --- 
+    :needle: 21844
+    :a: 21844
+    :b: 21844
+
+
+
+HISTORY
+  1.0.0
+    - adjust threadify to yield objects exactly like Enumerable#each
+
+  0.0.3
+    - added ability to short-circuit the parallel processing, a.k.a to 'break'
+      from threadify
+
+  0.0.2
+    - don't use thread.exit, just let the thread die naturally
+    - add version to Threadify module
+    - comments ;-)
