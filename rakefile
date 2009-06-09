@@ -84,21 +84,15 @@ task :gemspec do
 end
 
 task :gem => [:clean, :gemspec] do
-  
   Fu.mkdir_p This.pkgdir
-
-  Dir['*.gem'].each{|gem| Fu.rm_f gem}
-
+  before = Dir['*.gem']
   cmd = "gem build #{ This.gemspec }"
   `#{ cmd }`
-
-  gem = Dir['*.gem'].first or 'abort no gem!'
-
+  after = Dir['*.gem']
+  gem = ((after - before).first || after.first) or abort('no gem!')
   Fu.mv gem, This.pkgdir
-
   This.gem = File.basename(gem)
 end
-
 
 task :readme do
   samples = ''
