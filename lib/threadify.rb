@@ -1,5 +1,5 @@
 module Threadify
-  Threadify::VERSION = '1.1.0' unless defined?(Threadify::VERSION)
+  Threadify::VERSION = '1.2.0' unless defined?(Threadify::VERSION)
   def Threadify.version() Threadify::VERSION end
 
   require 'thread'
