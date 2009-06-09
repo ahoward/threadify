@@ -84,22 +84,19 @@ task :gemspec do
 end
 
 task :gem => [:clean, :gemspec] do
-  #gem = File.join(This.pkgdir, "#{ lib }.gemspec")
-  #open("#{ This.pkgdir }/#{ lib }.gemspec", "w"){|fd| fd.puts template}
-  #before = Dir['*.gem']
-  #cmd = "gem build #{ This.lib }.gemspec"
-  #`#{ cmd } 2>&1`
-  #after = Dir['*.gem']
-  #gems = [after - before]
-  #p gems
   
   Fu.mkdir_p This.pkgdir
-  Dir.chdir(This.pkgdir) do
-    cmd = "gem build ../#{ This.gemspec }"
-    `#{ cmd } 2>&1`
-    gem = Dir['*.gem'].first or 'abort no gem!'
-    This.gem = File.basename(gem)
-  end
+
+  Dir['*.gem'].each{|gem| Fu.rm_f gem}
+
+  cmd = "gem build #{ This.gemspec }"
+  `#{ cmd }`
+
+  gem = Dir['*.gem'].first or 'abort no gem!'
+
+  Fu.mv gem, This.pkgdir
+
+  This.gem = File.basename(gem)
 end
 
 
