@@ -23,7 +23,6 @@ module Enumerable
     threads = Integer(opts[:threads] || opts['threads'] || Threadify.threads)
     done = Object.new.freeze
     nothing = done
-    #jobs = Array.new(threads).map{ Queue.new }
     jobs = Array.new(threads).map{ [] }
     top = Thread.current
 
@@ -67,7 +66,6 @@ module Enumerable
           catch(:threadify) do
             loop{
               break if caught
-              #job = jobsi.pop
               job = jobsi.shift
               break if job == done
               args = job.first
