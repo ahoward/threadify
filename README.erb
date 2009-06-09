@@ -1,0 +1,38 @@
+NAME
+  threadify.rb
+
+SYNOPSIS
+  enumerable = %w( a b c d )
+  enumerable.threadify(2){ 'process this block using two worker threads' }
+  enumerable.threadify(:each_slice, 4){ 'process each slice of 4 in a thread' }
+
+DESCRIPTION
+  threadify.rb makes it stupid easy to process a bunch of data using 'n'
+  worker threads
+
+INSTALL
+  gem install threadify
+
+URI
+  http://rubyforge.org/projects/codeforpeople
+  http://github.com/ahoward/threadify/
+
+SAMPLES
+  <%= samples %>
+
+
+HISTORY
+  1.1.0
+    - added ability to specify arbitrary iterator (not only each)
+      [0,1,2,3].threadify(:each_slice, 2){|ary| ary}
+    - update samples
+    - auto include enumerator
+
+  0.0.3
+    - added ability to short-circuit the parallel processing, a.k.a to 'break'
+      from threadify
+
+  0.0.2
+    - don't use thread.exit, just let the thread die naturally
+    - add version to Threadify module
+    - comments ;-)

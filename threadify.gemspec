@@ -3,11 +3,11 @@
 
 Gem::Specification::new do |spec|
   spec.name = "threadify"
-  spec.version = "1.0.0"
+  spec.version = "1.1.0"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "threadify"
 
-  spec.files = ["gemspec.rb", "install.rb", "lib", "lib/threadify.rb", "rakefile", "README", "README.rb", "sample", "sample/a.rb", "sample/b.rb", "threadify.gemspec"]
+  spec.files = ["lib", "lib/threadify.rb", "rakefile", "README", "README.erb", "sample", "sample/a.rb", "sample/b.rb", "threadify.gemspec"]
   spec.executables = []
   
   spec.require_path = "lib"

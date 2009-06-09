@@ -1,26 +1,34 @@
 module Threadify
-  VERSION = '1.0.0'
+  Threadify::VERSION = '1.1.0' unless defined?(Threadify::VERSION)
   def Threadify.version() Threadify::VERSION end
 
   require 'thread'
+  require 'enumerator'
 
   @threads = 8
   @abort_on_exception = true
+  @strategy = [:each]
 
   class << self
     attr_accessor :threads
     attr_accessor :abort_on_exception
+    attr_accessor :strategy
   end
 
   class Error < ::StandardError; end
 end
 
 module Enumerable
-  def threadify(opts = {}, &block)
+  def threadify(*args, &block)
   # setup
   #
-    opts = {:threads => opts} if Numeric === opts
-    threads = Integer(opts[:threads] || opts['threads'] || Threadify.threads)
+    opts = args.last.is_a?(Hash) ? args.pop : {}
+    opts.keys.each{|key| opts[key.to_s.to_sym] = opts.delete(key)}
+    opts[:threads] ||= (Numeric === args.first ? args.shift : Threadify.threads)
+    opts[:strategy] ||= (args.empty? ? Threadify.strategy : args)
+
+    threads = Integer(opts[:threads])
+    strategy = opts[:strategy]
     done = Object.new.freeze
     nothing = done
     jobs = Array.new(threads).map{ [] }
@@ -29,7 +37,7 @@ module Enumerable
   # produce jobs
   #
     i = 0
-    each{|*args| jobs[i % threads].push([args, i]); i += 1}
+    send(*strategy){|*args| jobs[i % threads].push([args, i]); i += 1}
     threads.times{|i| jobs[i].push(done)}
 
   # setup consumer list
@@ -76,8 +84,8 @@ module Enumerable
 
 
         unless nothing == thrown
-          args, i = job
           thrownq.push [i, thrown]
+          args, i = job
         end
       end
     end

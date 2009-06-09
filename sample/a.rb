@@ -1,35 +1,30 @@
+require 'threadify'
+
 require 'open-uri'
 require 'yaml'
 
-require 'rubygems'
-require 'threadify'
-
-
 uris =
   %w(
+    http://codeforpeople.com
+    http://drawohara.com
+    http://twitter.com/drawohara
+    http://github.com/ahoward/threadify/
     http://google.com
-    http://yahoo.com
     http://rubyforge.org
     http://ruby-lang.org
-    http://kcrw.org
-    http://drawohara.com
-    http://codeforpeople.com
+    http://hypem.com
   )
 
+curl = lambda{|url| open(url){|socket| socket.read}}
 
 time 'without threadify' do
-  uris.each do |uri|
-    body = open(uri){|pipe| pipe.read}
-  end
+  uris.each{|uri| curl[uri]}
 end
 
 
 time 'with threadify' do
-  uris.threadify do |uri|
-    body = open(uri){|pipe| pipe.read}
-  end
+  uris.threadify(uris.size){|uri| curl[uri]}
 end
-
 
 BEGIN {
   def time label

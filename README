@@ -1,10 +1,21 @@
 NAME
-  threadify
+  threadify.rb
+
+SYNOPSIS
+  enumerable = %w( a b c d )
+  enumerable.threadify(2){ 'process this block using two worker threads' }
+  enumerable.threadify(:each_slice, 4){ 'process each slice of 4 in a thread' }
 
 DESCRIPTION
+  threadify.rb makes it stupid easy to process a bunch of data using 'n'
+  worker threads
 
 INSTALL
   gem install threadify
+
+URI
+  http://rubyforge.org/projects/codeforpeople
+  http://github.com/ahoward/threadify/
 
 SAMPLES
   
@@ -12,38 +23,33 @@ SAMPLES
 
   ~ > cat sample/a.rb
 
+    require 'threadify'
+    
     require 'open-uri'
     require 'yaml'
     
-    require 'rubygems'
-    require 'threadify'
-    
-    
     uris =
       %w(
+        http://codeforpeople.com
+        http://drawohara.com
+        http://twitter.com/drawohara
+        http://github.com/ahoward/threadify/
         http://google.com
-        http://yahoo.com
         http://rubyforge.org
         http://ruby-lang.org
-        http://kcrw.org
-        http://drawohara.com
-        http://codeforpeople.com
+        http://hypem.com
       )
     
+    curl = lambda{|url| open(url){|socket| socket.read}}
     
     time 'without threadify' do
-      uris.each do |uri|
-        body = open(uri){|pipe| pipe.read}
-      end
+      uris.each{|uri| curl[uri]}
     end
     
     
     time 'with threadify' do
-      uris.threadify do |uri|
-        body = open(uri){|pipe| pipe.read}
-      end
+      uris.threadify(uris.size){|uri| curl[uri]}
     end
-    
     
     BEGIN {
       def time label
@@ -58,21 +64,21 @@ SAMPLES
   ~ > ruby sample/a.rb
 
     --- 
-    without threadify: 7.70478916168213
+    without threadify: 12.6283850669861
     --- 
-    with threadify: 1.69362306594849
+    with threadify: 1.93842315673828
 
 
   <========< sample/b.rb >========>
 
   ~ > cat sample/b.rb
 
-    require 'yaml'
-    
-    require 'rubygems'
     require 'threadify'
     
-    size = Integer(ARGV.shift || (2 ** 15))
+    require 'yaml'
+    
+    #size = Integer(ARGV.shift || (2 ** 20))
+    size = 64
     
     haystack = Array.new(size){|i| i}
     needle = 2 * (size / 3) 
@@ -80,11 +86,19 @@ SAMPLES
     a, b = 4, 2
     
     time 'without threadify' do
-      a = haystack.each{|value| break value if value == needle}
+      a =
+        haystack.each do |value|
+          break value if value == needle
+          sleep(rand) # mimic work
+        end
     end
     
     time 'with threadify' do
-      b = haystack.threadify(16){|value| threadify! value if value == needle}
+      b = 
+        haystack.threadify(:each_slice, size / 8) do |slice|
+          slice.each{|value| threadify! value if value == needle}
+          sleep(rand) # mimic work
+        end
     end
     
     raise if a != b
@@ -104,12 +118,29 @@ SAMPLES
   ~ > ruby sample/b.rb
 
     --- 
-    without threadify: 0.00685286521911621
+    without threadify: 22.8657438755035
     --- 
-    with threadify: 0.546236038208008
+    with threadify: 0.967911005020142
     --- 
-    :needle: 21844
-    :a: 21844
-    :b: 21844
+    :needle: 42
+    :a: 42
+    :b: 42
 
 
+
+
+HISTORY
+  1.1.0
+    - added ability to specify arbitrary iterator (not only each)
+      [0,1,2,3].threadify(:each_slice, 2){|ary| ary}
+    - update samples
+    - auto include enumerator
+
+  0.0.3
+    - added ability to short-circuit the parallel processing, a.k.a to 'break'
+      from threadify
+
+  0.0.2
+    - don't use thread.exit, just let the thread die naturally
+    - add version to Threadify module
+    - comments ;-)
