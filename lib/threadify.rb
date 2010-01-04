@@ -1,5 +1,5 @@
 module Threadify
-  Threadify::VERSION = '1.2.0' unless defined?(Threadify::VERSION)
+  Threadify::VERSION = '1.4.2' unless defined?(Threadify::VERSION)
   def Threadify.version() Threadify::VERSION end
 
   require 'thread'
@@ -16,6 +16,20 @@ module Threadify
   end
 
   class Error < ::StandardError; end
+end
+
+def Threadify(*args, &block)
+  # setup
+  #
+    opts = args.last.is_a?(Hash) ? args.pop : {}
+    opts.keys.each{|key| opts[key.to_s.to_sym] = opts.delete(key)}
+    opts[:threads] ||= (Numeric === args.first ? args.shift : Threadify.threads)
+    opts[:strategy] ||= (args.empty? ? Threadify.strategy : args)
+
+    threads = Integer(opts[:threads])
+
+    array_of_blocks = Array.new(threads){ block }
+    array_of_blocks.threadify(opts){|b| b.call()}
 end
 
 module Enumerable
@@ -76,8 +90,8 @@ module Enumerable
               break if caught
               job = jobsi.shift
               break if job == done
-              args = job.first
-              jobsi << (job << block.call(*args))
+              argv = job.first
+              jobsi << (job << block.call(*argv))
             }
             nothing
           end
@@ -85,7 +99,7 @@ module Enumerable
 
         unless nothing == thrown
           thrownq.push [i, thrown]
-          args, i = job
+          argv, i = job
         end
       end
     end

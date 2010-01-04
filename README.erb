@@ -22,6 +22,14 @@ SAMPLES
 
 
 HISTORY
+  1.4.2
+    - fix name collision running under jruby's native threads.  thanks charles nutter!
+
+  1.3.0
+    - added Threadify(*args, &block) method to execute arbitrary code in parallel
+
+        Threadify(8){ puts Thread.current.object_id }.size #=> 8
+
   1.1.0
     - added ability to specify arbitrary iterator (not only each)
       [0,1,2,3].threadify(:each_slice, 2){|ary| ary}

@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "threadify"
-  spec.version = "1.1.0"
+  spec.version = "1.4.2"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "threadify"
 
