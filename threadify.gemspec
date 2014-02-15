@@ -3,18 +3,18 @@
 
 Gem::Specification::new do |spec|
   spec.name = "threadify"
-  spec.version = "1.4.3"
+  spec.version = "1.4.4"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "threadify"
-  spec.description = "https://github.com/ahoward/threadify.git"
+  spec.description = "makes it stupid easy to process a bunch of data using n worker threads"
   spec.license = "same as ruby's"
 
   spec.files =
 ["README",
  "README.erb",
+ "Rakefile",
  "lib",
  "lib/threadify.rb",
- "rakefile",
  "sample",
  "sample/a.rb",
  "sample/b.rb",
