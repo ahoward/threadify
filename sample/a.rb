@@ -32,6 +32,6 @@ BEGIN {
     yield
   ensure
     b = Time.now.to_f
-    y label => (b - a)
+    puts({label => (b - a)}.to_yaml)
   end
 }

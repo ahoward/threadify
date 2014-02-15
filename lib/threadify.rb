@@ -1,6 +1,10 @@
 module Threadify
-  Threadify::VERSION = '1.4.2' unless defined?(Threadify::VERSION)
+  Threadify::VERSION = '1.4.3' unless defined?(Threadify::VERSION)
   def Threadify.version() Threadify::VERSION end
+
+  def Threadify.description
+    'https://github.com/ahoward/threadify.git'
+  end
 
   require 'thread'
   require 'enumerator'

@@ -28,7 +28,7 @@ end
 
 raise if a != b
 
-y :a => a, :b => b, :needle => needle
+y({:a => a, :b => b, :needle => needle}.to_yaml)
 
 BEGIN {
   def time label
@@ -36,6 +36,6 @@ BEGIN {
     yield
   ensure
     b = Time.now.to_f
-    y label => (b - a)
+    y({label => (b - a)})
   end
 }
