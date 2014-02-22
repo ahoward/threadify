@@ -3,7 +3,7 @@
 
 Gem::Specification::new do |spec|
   spec.name = "threadify"
-  spec.version = "1.4.4"
+  spec.version = "1.4.5"
   spec.platform = Gem::Platform::RUBY
   spec.summary = "threadify"
   spec.description = "makes it stupid easy to process a bunch of data using n worker threads"
@@ -26,8 +26,7 @@ Gem::Specification::new do |spec|
 
   spec.test_files = nil
 
-### spec.add_dependency 'lib', '>= version'
-#### spec.add_dependency 'map'
+  
 
   spec.extensions.push(*[])
 
